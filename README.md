@@ -1,5 +1,9 @@
 # go-chat
 
+See the improvised version [here](https://github.com/alextanhongpin/go-chat.v2).
+
+
+
 ## Requirements
 
 **Functional requirements:**
@@ -259,6 +263,61 @@ The status of the user should be stored in a distributed cache like redis, so th
 - There are several ways to perform authentication, one is to use good ol' cookie, another is to use a ticker server.
 - Checkout Server Side Events for read-only events 
 
+## database design
+
+How do we go about creating the schema to store the chat groups, as well as chat messages?
+
+- create private chat
+- create chat with groups
+- store chat messages
+- block chat request
+
+
+Groups
+- user id: creator of the group
+- name: name of the group, default to names of the participant
+
+Group participants
+- group id (unique)
+- user id (unique)
+- blocked: null bool, whether they block the conversation or not
+
+
+Group participants private chat view
+- group by group id, only two person
+
+
+Group messages
+- user id
+- text
+- type: text, media, photo, video, audio
+
+To view chats,
+
+1) list the available chat groups if exists
+2) otherwise, list your friends
+
+To chat with someone (private)
+
+1) select the person to chat with
+2) check if there exists a group with the individuals
+3) create group if not exists, add participants
+4) send message to the group, but exclude yourself
+
+To chat with a group
+1) select the list of person to add to the group
+2) the rest is the same as above
+
+
+## Redis
+
+We use Redis to store the nodes (backend server ) where the user is logged in to.
+
+When a user opens a chat, we want to track
+- which device they are on (each device is a different id)
+- which server they are on (the pub sub should best send to only the particular server the user is on)
+
+The naive approach is to just broadcast to all server listening to one namespace
 
 ## References
 - https://www.thepolyglotdeveloper.com/2016/12/create-real-time-chat-app-golang-angular-2-websockets/
